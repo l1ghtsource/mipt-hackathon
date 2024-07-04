@@ -8,7 +8,7 @@
 
 ## Предложенное решение
 
-- использовали mink_quantization_size=0.06 в ITLPCampusOutdoor, это дало прирост к качеству (также пробовали 0.05, 0.08 и классические 0.5)
+- использовали _mink_quantization_size=0.06_ в ITLPCampusOutdoor, это дало прирост к качеству (также пробовали 0.05, 0.08 и классические 0.5)
 - в качестве модели для извелечения фичей из изображений использовали ConvNeXtTinyFeatureExtractor, учили 7 эпох (еще тестировали ResNet18 и ResNet50, они показали результаты хуже)
 - шедулер cosine_schedule_with_warmup (WARMUP_STEPS = 90, T_MAX = 1800), оптимизатор AdamW (WEIGHT_DECAY = 0.003), функция потерь BatchHardTripletMarginLoss (margin=0.5, также пробовали другие значения, однако они показывали худший результат)
 - GeM pooling, Concat fusion
