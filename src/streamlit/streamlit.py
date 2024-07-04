@@ -14,6 +14,7 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import faiss
+import io
 
 st.set_page_config(
     page_title='Мультикамерное распознавание места',
@@ -24,7 +25,7 @@ st.set_page_config(
 
 alt.themes.enable('dark')
 
-DATA_ROOT = '../public'
+DATA_ROOT = '/home/ubuntu/mipt-hackathon/src/public'
 FILE_NAME = 'test.csv'
 FILE_PATH = os.path.join(DATA_ROOT, FILE_NAME)
 
@@ -45,7 +46,8 @@ model = ImageModel(
 model.load_state_dict(
     torch.load('weights/model.pt', 
                map_location=torch.device('cpu'))
-    )
+)
+
 
 def extract_embeddings(model, descriptor_key, dataloader, device):
     model = model.to(device)
@@ -60,6 +62,7 @@ def extract_embeddings(model, descriptor_key, dataloader, device):
         test_embeddings = np.vstack(test_embeddings_list)
     return test_embeddings
 
+
 def test_submission(
     test_embeddings: np.ndarray, dataset_df: pd.DataFrame, filename: str = "submission.txt"
 ) -> None:
@@ -69,6 +72,7 @@ def test_submission(
     for _, group in dataset_df.groupby("track"):
         tracks.append(group.index.to_numpy())
     n = 1
+    
     ij_permutations = sorted(list(itertools.permutations(range(len(tracks)), 2)))
 
     submission_lines = []
@@ -90,6 +94,7 @@ def test_submission(
     with open(filename, "w") as f:
         for l in submission_lines:
             f.write(str(l)+"\n")
+      
             
 def get_ids():
     dataset = ITLPCampusOutdoor(
@@ -127,16 +132,17 @@ def read_numbers_from_file(file_path):
     
     return numbers
 
-@st.cache_data()
-def detect(file_path):
+
+def detect(bytes_data):
     try:
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(io.BytesIO(bytes_data))
         get_ids()
         return df
         
     except Exception as e:
         st.error(f"Error processing file: {e}")
         return None
+
 
 def visualize(df):
     ids = read_numbers_from_file('tuned_baseline_submission.txt')
@@ -179,11 +185,25 @@ def visualize(df):
     plt.tight_layout()
     st.pyplot(fig)
 
-    true_front_path = os.path.join('/home/ubuntu/mipt-hackathon/src/public', df.iloc[query_idxs[query_idx]]['track'], 'front_cam', f"{df.iloc[query_idxs[query_idx]]['front_cam_ts']}.png")
-    true_back_path = os.path.join('/home/ubuntu/mipt-hackathon/src/public', df.iloc[query_idxs[query_idx]]['track'], 'back_cam', f"{df.iloc[query_idxs[query_idx]]['back_cam_ts']}.png")
+    true_front_path = os.path.join('/home/ubuntu/mipt-hackathon/src/public', 
+                                   df.iloc[query_idxs[query_idx]]['track'], 
+                                   'front_cam', 
+                                   f"{df.iloc[query_idxs[query_idx]]['front_cam_ts']}.png")
     
-    pred_front_path = os.path.join('/home/ubuntu/mipt-hackathon/src/public', df.iloc[db_idxs[query_idx]]['track'], 'front_cam', f"{df.iloc[db_idxs[query_idx]]['front_cam_ts']}.png")
-    pred_back_path = os.path.join('/home/ubuntu/mipt-hackathon/src/public', df.iloc[db_idxs[query_idx]]['track'], 'back_cam', f"{df.iloc[db_idxs[query_idx]]['back_cam_ts']}.png")
+    true_back_path = os.path.join('/home/ubuntu/mipt-hackathon/src/public', 
+                                  df.iloc[query_idxs[query_idx]]['track'], 
+                                  'back_cam', 
+                                  f"{df.iloc[query_idxs[query_idx]]['back_cam_ts']}.png")
+    
+    pred_front_path = os.path.join('/home/ubuntu/mipt-hackathon/src/public', 
+                                   df.iloc[db_idxs[query_idx]]['track'], 
+                                   'front_cam', 
+                                   f"{df.iloc[db_idxs[query_idx]]['front_cam_ts']}.png")
+    
+    pred_back_path = os.path.join('/home/ubuntu/mipt-hackathon/src/public', 
+                                  df.iloc[db_idxs[query_idx]]['track'], 
+                                  'back_cam', 
+                                  f"{df.iloc[db_idxs[query_idx]]['back_cam_ts']}.png")
     
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))
     
@@ -210,6 +230,7 @@ def visualize(df):
     plt.tight_layout()
     st.pyplot(fig)
 
+
 def save_uploaded_file(uploaded_file, directory, filename):
     try:
         os.makedirs(directory, exist_ok=True)
@@ -221,19 +242,26 @@ def save_uploaded_file(uploaded_file, directory, filename):
         st.error(f"Error saving file: {e}")
         return None
 
+
 def main():
     state = st.session_state.get('state', 'initial')
 
     if state == 'initial':
         st.title('📽️ Мультикамерное распознавание места')
 
-        uploaded_file = st.file_uploader('Загрузите CSV', type=['csv'])
-        if uploaded_file is not None:
-            file_path = save_uploaded_file(uploaded_file, DATA_ROOT, FILE_NAME)
-            if file_path:
-                st.session_state['file_path'] = file_path
-                st.session_state['state'] = 'working'
-                st.rerun()
+        uploaded_file = st.file_uploader('Загрузите CSV', type=['csv'], disabled=True)
+        # if uploaded_file is not None:
+        #     file_path = save_uploaded_file(uploaded_file, DATA_ROOT, FILE_NAME)
+        #     if file_path:
+        #         st.session_state['file_bytes'] = uploaded_file.read()
+        #         st.session_state['state'] = 'working'
+        #         st.rerun()
+        file_path = '/home/ubuntu/mipt-hackathon/src/public/test.csv'
+        if file_path:
+            with open(file_path, 'rb') as file:
+                st.session_state['file_bytes'] = file.read()
+            st.session_state['state'] = 'working'
+            st.rerun()
 
     elif state == 'working':
         with st.sidebar:
@@ -250,20 +278,15 @@ def main():
                 st.session_state['state'] = 'initial'
                 st.rerun()
 
-            elif st.button('Документация'):
-                st.session_state['state'] = 'docs'
-                st.rerun()
+            st.link_button('Github репозиторий', 'https://github.com/l1ghtsource/mipt-hackathon')
 
-        file_path = st.session_state.get('file_path')
-        
-        df = detect(file_path)
-        visualize(df)
+        file_bytes = st.session_state.get('file_bytes')
 
-            
-    elif state == 'docs':
-        st.title('Документация')
-        st.write('Документация по использованию приложения.')
-        
+        if file_bytes:
+            df = detect(file_bytes)
+            if df is not None:
+                visualize(df)
+
         if st.button('Вернуться к загрузке файла'):
             st.session_state['state'] = 'initial'
             st.rerun()
