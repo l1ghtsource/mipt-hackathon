@@ -1,6 +1,6 @@
 # Хакатон МФТИ 2024
 
-Веб-сервис: http://whereismyplace.itatmisis.ru:8501/
+Веб-сервис: [тык](http://whereismyplace.itatmisis.ru:8501/)
 
 Презентация: [тык](https://drive.google.com/file/d/1lyFPwIg8UI6X0OlbvL3-pieV4R_ENZq0/view?usp=sharing)
 
