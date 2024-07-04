@@ -54,5 +54,7 @@
 
 ## Содержание репозитория
 - `notebooks` - здесь лежат наши попытки поработать с текстами и масками, реранжирование, faiss и итоговый код
-- - [mipt_convnext.ipynb](https://nbviewer.org/github/l1ghtsource/mipt-hackathon/blob/main/notebooks/mipt_convnext.ipynb)
+  - [mipt_convnext.ipynb](https://nbviewer.org/github/l1ghtsource/mipt-hackathon/blob/main/notebooks/mipt_convnext.ipynb)
+  - [text_masks_faiss_solution.ipynb](https://nbviewer.org/github/l1ghtsource/mipt-hackathon/blob/main/notebooks/text_masks_faiss_solution.ipynb)
+  - []()
 - `src` - а здесь фронт и бэк для нашего творения
