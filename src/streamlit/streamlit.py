@@ -25,7 +25,7 @@ st.set_page_config(
 
 alt.themes.enable('dark')
 
-DATA_ROOT = '/home/ubuntu/mipt-hackathon/src/public'
+DATA_ROOT = '/home/ubuntu/mipt-hackathon/src/normal/public'
 FILE_NAME = 'test.csv'
 FILE_PATH = os.path.join(DATA_ROOT, FILE_NAME)
 
@@ -132,7 +132,7 @@ def read_numbers_from_file(file_path):
     
     return numbers
 
-
+@st.cache_data()
 def detect(bytes_data):
     try:
         df = pd.read_csv(io.BytesIO(bytes_data))
@@ -185,22 +185,22 @@ def visualize(df):
     plt.tight_layout()
     st.pyplot(fig)
 
-    true_front_path = os.path.join('/home/ubuntu/mipt-hackathon/src/public', 
+    true_front_path = os.path.join('/home/ubuntu/mipt-hackathon/src/normal/public', 
                                    df.iloc[query_idxs[query_idx]]['track'], 
                                    'front_cam', 
                                    f"{df.iloc[query_idxs[query_idx]]['front_cam_ts']}.png")
     
-    true_back_path = os.path.join('/home/ubuntu/mipt-hackathon/src/public', 
+    true_back_path = os.path.join('/home/ubuntu/mipt-hackathon/src/normal/public', 
                                   df.iloc[query_idxs[query_idx]]['track'], 
                                   'back_cam', 
                                   f"{df.iloc[query_idxs[query_idx]]['back_cam_ts']}.png")
     
-    pred_front_path = os.path.join('/home/ubuntu/mipt-hackathon/src/public', 
+    pred_front_path = os.path.join('/home/ubuntu/mipt-hackathon/src/normal/public', 
                                    df.iloc[db_idxs[query_idx]]['track'], 
                                    'front_cam', 
                                    f"{df.iloc[db_idxs[query_idx]]['front_cam_ts']}.png")
     
-    pred_back_path = os.path.join('/home/ubuntu/mipt-hackathon/src/public', 
+    pred_back_path = os.path.join('/home/ubuntu/mipt-hackathon/src/normal/public', 
                                   df.iloc[db_idxs[query_idx]]['track'], 
                                   'back_cam', 
                                   f"{df.iloc[db_idxs[query_idx]]['back_cam_ts']}.png")
@@ -229,7 +229,55 @@ def visualize(df):
     
     plt.tight_layout()
     st.pyplot(fig)
+    
+    true_front_path = os.path.join('/home/ubuntu/mipt-hackathon/src/normal/public', 
+                                   df.iloc[query_idxs[query_idx]]['track'], 
+                                   'masks',
+                                   'front_cam', 
+                                   f"{df.iloc[query_idxs[query_idx]]['front_cam_ts']}.png")
+    
+    true_back_path = os.path.join('/home/ubuntu/mipt-hackathon/src/normal/public', 
+                                  df.iloc[query_idxs[query_idx]]['track'], 
+                                  'masks',
+                                  'back_cam', 
+                                  f"{df.iloc[query_idxs[query_idx]]['back_cam_ts']}.png")
+    
+    pred_front_path = os.path.join('/home/ubuntu/mipt-hackathon/src/normal/public', 
+                                   df.iloc[db_idxs[query_idx]]['track'], 
+                                   'masks',
+                                   'front_cam', 
+                                   f"{df.iloc[db_idxs[query_idx]]['front_cam_ts']}.png")
+    
+    pred_back_path = os.path.join('/home/ubuntu/mipt-hackathon/src/normal/public', 
+                                  df.iloc[db_idxs[query_idx]]['track'], 
+                                  'masks',
+                                  'back_cam', 
+                                  f"{df.iloc[db_idxs[query_idx]]['back_cam_ts']}.png")
+    
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+    
+    query_front_img = plt.imread(true_front_path)
+    axes[0, 0].imshow(query_front_img)
+    axes[0, 0].axis('off')
+    axes[0, 0].set_title('Query: Front Camera Semantic Mask')
 
+    pred_front_img = plt.imread(pred_front_path)
+    axes[0, 1].imshow(pred_front_img)
+    axes[0, 1].axis('off')
+    axes[0, 1].set_title('Prediction: Front Camera Semantic Mask')
+    
+    query_back_img = plt.imread(true_back_path)
+    axes[1, 0].imshow(query_back_img)
+    axes[1, 0].axis('off')
+    axes[1, 0].set_title('Query: Back Camera Semantic Mask')
+    
+    pred_back_img = plt.imread(pred_back_path)
+    axes[1, 1].imshow(pred_back_img)
+    axes[1, 1].axis('off')
+    axes[1, 1].set_title('Prediction: Back Camera Semantic Mask')
+    
+    plt.tight_layout()
+    st.pyplot(fig)
 
 def save_uploaded_file(uploaded_file, directory, filename):
     try:
@@ -244,52 +292,42 @@ def save_uploaded_file(uploaded_file, directory, filename):
 
 
 def main():
-    state = st.session_state.get('state', 'initial')
+    # if state == 'initial':
+    #     st.title('📽️ Мультикамерное распознавание места')
 
-    if state == 'initial':
-        st.title('📽️ Мультикамерное распознавание места')
-
-        uploaded_file = st.file_uploader('Загрузите CSV', type=['csv'], disabled=True)
+    #     uploaded_file = st.file_uploader('Загрузите CSV', type=['csv'], disabled=True)
         # if uploaded_file is not None:
         #     file_path = save_uploaded_file(uploaded_file, DATA_ROOT, FILE_NAME)
         #     if file_path:
         #         st.session_state['file_bytes'] = uploaded_file.read()
         #         st.session_state['state'] = 'working'
         #         st.rerun()
-        file_path = '/home/ubuntu/mipt-hackathon/src/public/test.csv'
-        if file_path:
-            with open(file_path, 'rb') as file:
-                st.session_state['file_bytes'] = file.read()
-            st.session_state['state'] = 'working'
-            st.rerun()
+    file_path = '/home/ubuntu/mipt-hackathon/src/normal/public/test.csv'
+    if file_path:
+        with open(file_path, 'rb') as file:
+            st.session_state['file_bytes'] = file.read()
+    with st.sidebar:
+        st.title('📽️ Мультикамерное распознавание места')
 
-    elif state == 'working':
-        with st.sidebar:
-            st.title('📽️ Мультикамерное распознавание места')
+        st.write(
+            '''
+            Задача предложена Центром когнитивного моделирования МФТИ
+            при поддержке Фонда содействия инновациям
+            '''
+        )
 
-            st.write(
-                '''
-                Задача предложена Центром когнитивного моделирования МФТИ
-                при поддержке Фонда содействия инновациям
-                '''
-            )
+        # if st.button('Загрузить другой файл'):
+        #     st.session_state['state'] = 'initial'
+        #     st.rerun()
 
-            if st.button('Загрузить другой файл'):
-                st.session_state['state'] = 'initial'
-                st.rerun()
+        st.link_button('Github репозиторий', 'https://github.com/l1ghtsource/mipt-hackathon')
 
-            st.link_button('Github репозиторий', 'https://github.com/l1ghtsource/mipt-hackathon')
+    file_bytes = st.session_state.get('file_bytes')
 
-        file_bytes = st.session_state.get('file_bytes')
-
-        if file_bytes:
-            df = detect(file_bytes)
-            if df is not None:
-                visualize(df)
-
-        if st.button('Вернуться к загрузке файла'):
-            st.session_state['state'] = 'initial'
-            st.rerun()
+    if file_bytes:
+        df = detect(file_bytes)
+        if df is not None:
+            visualize(df)
 
 
 if __name__ == '__main__':
