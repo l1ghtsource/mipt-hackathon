@@ -1,4 +1,10 @@
-# Хакатон МФТИ 2024
+# Хакатон МФТИ 2024 (1 место)
+
+Team Members:
+1) **Арина Замышевская** - ML (@nimblesquirrel)
+2) **Кирилл Рыжичкин** - ML, Frontend (@polnostju)
+3) **Владислав Голенков** - Geo visualization (@VGol_Tel)
+4) **Яна Башлыкова** - Design (@yanesskka)
 
 Веб-сервис: [тык](http://whereismyplace.itatmisis.ru:8501/)
 
